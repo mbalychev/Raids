@@ -1,0 +1,96 @@
+﻿@model Raid
+
+@{
+    ViewData["Title"] = "Рейд";
+}
+
+<h1>Информация</h1>
+
+<div>
+    <h4>Рейд</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Nomer)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Nomer)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Prikaz)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Prikaz)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Start)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Start)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Stop)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Stop)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Terr.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Terr.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Close)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Close)
+        </dd>
+        <dt class="col-sm-2">
+            Файлы
+        </dt>
+        <dd class="col-sm-10">
+            <ul>
+                @foreach (Rfile file in Model.Rfile)
+                {
+                    <li>
+                        @file.Name
+                    </li>
+                }
+            </ul>
+        </dd>
+        <dt class="col-sm-2">
+            Исполнители
+        </dt>
+        <dd class="col-sm-10">
+            <ul>
+                @foreach (Risp isp in Model.Risp)
+                {
+                    <li>
+                        @isp.Isp.Name
+                    </li>
+                }
+            </ul>
+        </dd>
+        <dt class="col-sm-2">
+            Показатели
+        </dt>
+        <dd class="col-sm-10">
+            <ul>
+                @foreach (Rpokazatel rpokazatel in Model.Rpokazatel)
+                {
+                    <li>
+                        <label>
+                            @rpokazatel.Pokazatel.Name  
+                             - @rpokazatel.Amount
+                        </label>
+                    </li>
+                }
+            </ul>
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
