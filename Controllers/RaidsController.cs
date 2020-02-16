@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Raids.Data;
 using Raids.Models;
+using Raids.Models.Adds;
 
 namespace Raids.Controllers
 {
@@ -20,10 +21,26 @@ namespace Raids.Controllers
         }
 
         // GET: Raids
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, string sortNumber, string sortDate, int filterTerr, DateTime start, DateTime stop, string filter)
         {
-            return View(await _context.Raids.Include(t=>t.Terr).ToListAsync());
+            FilterParams filterParams = new FilterParams(search, sortNumber, sortDate, filterTerr, start, stop, filter);
+
+            List<Raid> raids = await Models.Adds.FilterParams.GetRaidsAsync(_context, filterParams);
+
+            ViewData["FilterTerr"] = filterTerr;
+            ViewData["Start"] = filterParams.Start;
+            ViewData["Stop"] = filterParams.Stop;
+            ViewData["Terr"] = await _context.Terrs.AsNoTracking().ToListAsync();
+            ViewData["Search"] = search;
+            ViewData["SortNumber"] = sortNumber == "asc" ? "desc" : "asc";
+            if (string.IsNullOrEmpty(sortNumber)) sortNumber = "asc";
+
+            ViewData["SortDate"] = sortDate == "asc" ? "desc" : "asc";
+            if (string.IsNullOrEmpty(sortDate)) sortDate = "asc";
+
+            return View(raids);
         }
+
 
         // GET: Raids/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -34,10 +51,10 @@ namespace Raids.Controllers
             }
 
             var raid = await _context.Raids
-                .Include(t=>t.Terr)
-                .Include(t=>t.Rpokazatel).ThenInclude(r=>r.Pokazatel)
-                .Include(r=>r.Risp).ThenInclude(i=>i.Isp)
-                .Include(r=>r.Rfile)
+                .Include(t => t.Terr)
+                .Include(t => t.Rpokazatel).ThenInclude(r => r.Pokazatel)
+                .Include(r => r.Risp).ThenInclude(i => i.Isp)
+                .Include(r => r.Rfile)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (raid == null)
             {
@@ -48,8 +65,9 @@ namespace Raids.Controllers
         }
 
         // GET: Raids/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewData["Terr"] = await _context.Terrs.AsNoTracking().ToListAsync();
             return View();
         }
 
@@ -66,7 +84,7 @@ namespace Raids.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(raid);
+            return View("Index");
         }
 
         // GET: Raids/Edit/5
@@ -82,6 +100,7 @@ namespace Raids.Controllers
             {
                 return NotFound();
             }
+            ViewData["Terr"] = await _context.Terrs.AsNoTracking().ToListAsync();
             return View(raid);
         }
 
@@ -90,7 +109,7 @@ namespace Raids.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nomer,Prikaz,Start,Stop,TerrId,Close")] Raid raid)
+        public async Task<IActionResult> Edit(int id, [Bind("Id, Nomer,Prikaz,Start,Stop,TerrId,Close")] Raid raid)
         {
             if (id != raid.Id)
             {
@@ -99,6 +118,12 @@ namespace Raids.Controllers
 
             if (ModelState.IsValid)
             {
+                if (raid.Start > raid.Stop)
+                {
+                    ModelState.AddModelError("", "Дата завершения не может быть меньше даты начала");
+                    ViewData["Terr"] = await _context.Terrs.AsNoTracking().ToListAsync();
+                    return View(raid);
+                }
                 try
                 {
                     _context.Update(raid);
@@ -112,12 +137,12 @@ namespace Raids.Controllers
                     }
                     else
                     {
-                        throw;
+                        return View(raid);
                     }
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(raid);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Raids/Delete/5
@@ -153,5 +178,6 @@ namespace Raids.Controllers
         {
             return _context.Raids.Any(e => e.Id == id);
         }
+
     }
 }

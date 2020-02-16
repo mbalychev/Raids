@@ -1,19 +1,48 @@
 ﻿@model IEnumerable<Raids.Models.Raid>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Рейды";
 }
 
-<h1>Index</h1>
+<h1>Список рейдов</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Новый</a>
 </p>
+
+<form asp-action="Index">
+    <div class="input-group" style="margin: 40px auto 40px auto;">
+        <input class="form-control" placeholder="номер рейда" value="@ViewData["Search"]" name="search"></input>
+        <select name="filterTerr" class="custom-select" style="max-width: 250px;">
+            <option value="0" selected>
+                все
+            </option>
+            @foreach (Terr terr in ViewBag.Terr)
+            {
+                <!option value="@terr.Id" @((Convert.ToInt32(ViewData["FilterTerr"]) == terr.Id) ? "selected" : "")>
+                    @terr.Name
+                </!option>
+            }
+        </select>
+
+
+
+        <input type="date" name="start" value="@ViewBag.Start.ToString("yyyy-MM-dd")" />
+        <input type="date" name="stop" value="@ViewBag.Stop.ToString("yyyy-MM-dd")" />
+
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-dark">Найти</button>
+        </div>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Nomer)
+                <a asp-action="Index" asp-route-sortNumber="@ViewData["SortNumber"]" asp-route-filterTerr="@ViewData["FilterTerr"]" asp-route-search="@ViewData["Search"]" asp-route-start="@ViewBag.Start.ToString("yyyy-MM-dd")" asp-route-stop="@ViewBag.Stop.ToString("yyyy-MM-dd")">
+                    @Html.DisplayNameFor(model => model.Nomer)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Prikaz)
@@ -22,7 +51,9 @@
                 @Html.DisplayNameFor(model => model.Start)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Stop)
+                <a asp-action="Index" asp-route-sortDate="@ViewData["SortDate"]" asp-route-filterTerr="@ViewData["FilterTerr"]" asp-route-search="@ViewData["Search"]" asp-route-start="@ViewBag.Start.ToString("yyyy-MM-dd")" asp-route-stop="@ViewBag.Stop.ToString("yyyy-MM-dd")">
+                    @Html.DisplayNameFor(model => model.Stop)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Terr.Name)
@@ -34,34 +65,35 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nomer)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Prikaz)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Start)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Stop)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Terr.Name)
-            </td>
-            <td>
-                @Html.CheckBoxFor(modelItem => item.Close)
-            </td>
-            <td>
-                @if (item.Close != true)
-                {
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit | </a> 
-                }
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nomer)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Prikaz)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Start)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Stop)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Terr.Name)
+                </td>
+                <td>
+                    @Html.CheckBoxFor(modelItem => item.Close)
+                </td>
+                <td>
+                    @if (item.Close != true)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit | </a>
+                    }
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
